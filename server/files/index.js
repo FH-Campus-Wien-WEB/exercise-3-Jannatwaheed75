@@ -46,14 +46,14 @@ function loadMovies(genre) {
   xhr.onload = function () {
     const mainElement = document.querySelector("main");
 
-    while (mainElement.childElementCount > 0) {
+    while (mainElement.childElementCount > 0) { //alte Filme entfernen
       mainElement.firstChild.remove()
     }
 
     if (xhr.status === 200) {
       const movies = JSON.parse(xhr.responseText)
       for (const movie of movies) {
-        appendMovie(movie, mainElement)
+        appendMovie(movie, mainElement) //neue filme anzeigen
       }
     } else {
       mainElement.append(`Daten konnten nicht geladen werden, Status ${xhr.status} - ${xhr.statusText}`);
@@ -62,6 +62,9 @@ function loadMovies(genre) {
 
   const url = new URL("/movies", location.href)
   /* Task 1.4. Add query parameter to the url if a genre is given */
+   if (genre) {
+    url.searchParams.set("genre", genre);
+  }
 
   xhr.open("GET", url)
   xhr.send()
@@ -70,7 +73,7 @@ function loadMovies(genre) {
 window.onload = function () {
   const xhr = new XMLHttpRequest();
   xhr.onload = function () {
-    const listElement = document.querySelector("nav>ul");
+    const nav = document.querySelector("nav");
 
     if (xhr.status === 200) {
       /* Task 1.3. Add the genre buttons to the listElement and 
@@ -78,11 +81,29 @@ window.onload = function () {
          loadMovies(...) function above. */
       const genres = JSON.parse(xhr.responseText);
 
+          // ALL BUTTON
+          const allBtn = document.createElement("button");
+          allBtn.textContent = "All";
+          allBtn.onclick = function () {
+            loadMovies();
+          };
+          nav.appendChild(allBtn);
+
+          // GENRES
+          for (const genre of genres) {
+            const btn = document.createElement("button");
+            btn.textContent = genre;
+
+            btn.onclick = function () {
+              loadMovies(genre);
+            };
+
+            nav.appendChild(btn);
+          }
+
       /* When a first button exists, we click it to load all movies. */
-      const firstButton = document.querySelector("nav button");
-      if (firstButton) {
-        firstButton.click();
-      }
+      allBtn.click();
+      
     } else {
       document.querySelector("body").append(`Daten konnten nicht geladen werden, Status ${xhr.status} - ${xhr.statusText}`);
     }
